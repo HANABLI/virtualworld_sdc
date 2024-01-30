@@ -80,5 +80,10 @@ class GraphEditor {
         }
     }
 
+    dispose() {
+        this.graph.dispose();
+        this.selected = null;
+        this.hovered = null;
+    }
    
 }

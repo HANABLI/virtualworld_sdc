@@ -71,9 +71,9 @@ class ViewPort {
         this.ctx.restore();
         this.ctx.clearRect(0, 0, myCanvas.width, myCanvas.height);
         this.ctx.save();
-        this.ctx.translate(viewPort.center.x, viewPort.center.y);
-        this.ctx.scale(1 / viewPort.zoom, 1 / viewPort.zoom);
-        const offset = viewPort.getOffset();
+        this.ctx.translate(this.center.x, this.center.y);
+        this.ctx.scale(1 / this.zoom, 1 / this.zoom);
+        const offset = this.getOffset();
         this.ctx.translate(offset.x, offset.y);
     }
 }

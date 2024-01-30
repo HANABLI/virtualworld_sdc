@@ -4,6 +4,21 @@ class Graph {
         this.segments = segments;
     }
 
+    static load(info) {
+        const points = info.points.map((p) => new Point(p.x, p.y));
+        const segments = [];
+        // for (const point of info.points) {
+        //     points.push(new Point(point.x, point.y));
+        // }
+        for (const seg of info.segments) {
+            segments.push(new Segment(
+                points.find((p) => p.equals(seg.p1)), 
+                points.find((p) => p.equals(seg.p2))
+            ));
+        }
+        return new Graph(points, segments);
+    }
+
     draw(ctx) {
         for (const seg of this.segments) {
             seg.draw(ctx);
