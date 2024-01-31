@@ -16,6 +16,8 @@
         <script src="js/math/utils.js"></script>
         <script src="js/primitives/point.js"></script>
         <script src="js/primitives/segment.js"></script>
+        <script src="js/primitives/polygon.js"></script>
+        <script src="js/primitives/envelope.js"></script>
         <script src="js/graphEditor.js"></script>
         <script src="js/viewport.js"></script>
         <script>       
@@ -26,6 +28,8 @@
             const graphString = localStorage.getItem('graph');
             const graphInfo = graphString ? JSON.parse(graphString) : null;
             const graph = graphInfo ?  Graph.load(graphInfo) : new Graph() ;
+            const world = new World(graph);
+            
             const viewPort = new ViewPort(myCanvas);
             const graphEditor = new GraphEditor(viewPort, graph);
 
@@ -34,6 +38,8 @@
             function animate() {        
                 viewPort.reset();
                 graphEditor.display();
+                //new Polygon(graph.points).draw(ctx);
+                new Envelope(graph.segments[0], 200, 20).draw(ctx);
                 requestAnimationFrame(animate); //recursif call 60 times per seconde
             }
 
