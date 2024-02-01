@@ -32,5 +32,6 @@ class Envelope {
 
     draw(ctx) {
         this.polygone.draw(ctx);
+        this.polygone.drawSegments(ctx);
     }
 }

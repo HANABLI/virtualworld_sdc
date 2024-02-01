@@ -12,6 +12,7 @@
             <button onclick="save()">💾</button>
         </div>
         
+        <script src="js/world.js"></script>
         <script src="js/math/graph.js"></script>
         <script src="js/math/utils.js"></script>
         <script src="js/primitives/point.js"></script>
@@ -27,8 +28,9 @@
             const ctx = myCanvas.getContext("2d");
             const graphString = localStorage.getItem('graph');
             const graphInfo = graphString ? JSON.parse(graphString) : null;
-            const graph = graphInfo ?  Graph.load(graphInfo) : new Graph() ;
-            const world = new World(graph);
+            const graph = graphInfo ?  Graph.load(graphInfo) : new Graph() ; // we load graph from localStorage if existed, if nothing to get from localStorage we create an empti graph
+            
+            const world = new World(graph); // the wold will be based on the graph
             
             const viewPort = new ViewPort(myCanvas);
             const graphEditor = new GraphEditor(viewPort, graph);
@@ -37,9 +39,12 @@
 
             function animate() {        
                 viewPort.reset();
+                world.generate();
+                world.draw(ctx);
                 graphEditor.display();
+
                 //new Polygon(graph.points).draw(ctx);
-                new Envelope(graph.segments[0], 200, 20).draw(ctx);
+                //new Envelope(graph.segments[0], 200, 20).draw(ctx);
                 requestAnimationFrame(animate); //recursif call 60 times per seconde
             }
 

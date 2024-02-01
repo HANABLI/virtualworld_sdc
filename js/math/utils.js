@@ -11,6 +11,30 @@ function getNearestPoint(loc, points, threshold = Number.MAX_SAFE_INTEGER) {
     return nearest;
 }
 
+function getIntersection(A, B, C, D) {
+    const tTop = (D.x - C.x) * (A.y - C.y) - (D.y - C.y) * (A.x - C.x);
+    const uTop = (C.y - A.y) * (A.x - B.x) - (C.x - A.x) * (A.y - B.y);
+    const bottom = (D.y - C.y) * (B.x - A.x) - (D.x - C.x) * (B.y - A.y);
+
+    if (bottom != 0) {
+        const t = tTop / bottom;
+        const u = uTop / bottom;
+        if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+            return {
+                x: lerp(A.x, B.x, t),
+                y: lerp(A.y, B.y, t),
+                offset: t,
+            };
+        }
+    }
+
+    return null;
+}
+
+function lerp(a, b, t) {
+    return a + (b - a) * t;
+}
+
 function distance(p1, p2) {
     return Math.hypot(p1.x - p2.x, p1.y - p2.y);
 }
@@ -36,6 +60,11 @@ function translate(loc, angle, offset) {
         loc.x + Math.cos(angle) * offset,
         loc.y + Math.sin(angle) * offset
     );
+}
+
+function getRandomColor() {
+    const hue = 290 + Math.random() * 260;
+    return "hsl(" + hue + ", 100%, 60%)";
 }
 
 
