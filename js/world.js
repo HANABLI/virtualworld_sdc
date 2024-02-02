@@ -70,7 +70,7 @@ class World {
             // check if trees intersects each others
             if(keep) {
                 for (const tree of trees) {
-                    if (distance(tree, p) < this.treeSize) {
+                    if (distance(tree.center, p) < this.treeSize) {
                         keep = false;
                         break;
                     }
@@ -90,7 +90,7 @@ class World {
             }
 
             if (keep) {
-                trees.push(p)
+                trees.push(new Tree(p, this.treeSize));
                 tryCount = 0;
             }
             tryCount++;
@@ -161,7 +161,7 @@ class World {
         return bases;
     }
 
-    draw(ctx) {
+    draw(ctx, viewPoint) {
         for (const envelope of this.envelopes) {
             envelope.draw(ctx, { fill: "#BBB", stroke: "#BBB", lineWidth: 15});
         }
@@ -175,7 +175,7 @@ class World {
             bld.draw(ctx);
         }
         for (const tree of this.trees) {
-            tree.draw(ctx, { size: this.treeSize, color: "rgba(0,0,0,0.5)"});
+            tree.draw(ctx, viewPoint);
         }
     }
 

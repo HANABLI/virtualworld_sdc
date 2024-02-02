@@ -12,6 +12,7 @@
             <button onclick="save()">💾</button>
         </div>
         
+        <script src="js/items/tree.js"></script>
         <script src="js/world.js"></script>
         <script src="js/math/graph.js"></script>
         <script src="js/math/utils.js"></script>
@@ -44,8 +45,9 @@
                     world.generate();
                     oldGraphHash = graph.hash();
                 }
-                world.draw(ctx);
-                //graphEditor.display();
+                const viewPoint = scale(viewPort.getOffset(), -1)
+                world.draw(ctx, viewPoint);
+                graphEditor.display();
 
                 //new Polygon(graph.points).draw(ctx);
                 //new Envelope(graph.segments[0], 200, 20).draw(ctx);
