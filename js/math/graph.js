@@ -81,4 +81,8 @@ class Graph {
         }
         return false;
     }
+
+    hash() {
+        return JSON.stringify(this);
+    }
 }

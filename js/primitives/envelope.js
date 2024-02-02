@@ -30,8 +30,8 @@ class Envelope {
        return new Polygon(points);
     }
 
-    draw(ctx) {
-        this.polygone.draw(ctx);
-        this.polygone.drawSegments(ctx);
+    draw(ctx, option) {
+        this.polygone.draw(ctx, option);
+        //this.polygone.drawSegments(ctx);
     }
 }

@@ -3,7 +3,15 @@ class Segment {
         this.p1 = p1;
         this.p2 = p2;
     }
- 
+    
+    length() {
+        return distance(this.p1, this.p2);
+    }
+
+    directionVector() {
+        return normalize(substract(this.p2, this.p1));
+    }
+
     equals(segmet) {
         //return (this.p1 == segmet.p1 && this.p2 == segmet.p2) || (this.p2 == segmet.p1 && this.p1 == segmet.p2);
         return this.contains(segmet.p1) && this.contains(segmet.p2);
@@ -15,7 +23,7 @@ class Segment {
 
     draw(ctx, {width = 2, color = "black", dash = []} = {}) {
         ctx.beginPath();
-        ctx.lineWidh = width;
+        ctx.lineWidth = width;
         ctx.strokeStyle = color;
         ctx.setLineDash(dash);
         ctx.moveTo(this.p1.x, this.p1.y);

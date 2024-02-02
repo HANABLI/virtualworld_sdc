@@ -22,8 +22,8 @@
         <script src="js/graphEditor.js"></script>
         <script src="js/viewport.js"></script>
         <script>       
-            myCanvas.width = 600;
-            myCanvas.height = 600;
+            myCanvas.width = 800;
+            myCanvas.height = 800;
 
             const ctx = myCanvas.getContext("2d");
             const graphString = localStorage.getItem('graph');
@@ -35,11 +35,15 @@
             const viewPort = new ViewPort(myCanvas);
             const graphEditor = new GraphEditor(viewPort, graph);
 
+            let oldGraphHash = graph.hash();
             animate();
 
             function animate() {        
                 viewPort.reset();
-                world.generate();
+                if (graph.hash() != oldGraphHash) {
+                    world.generate();
+                    oldGraphHash = graph.hash();
+                }
                 world.draw(ctx);
                 graphEditor.display();
 
