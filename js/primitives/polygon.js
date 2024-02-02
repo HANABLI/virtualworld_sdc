@@ -96,6 +96,14 @@ class Polygon {
         return false
     }
 
+    distanceToPoint(point) {
+        return Math.min(...this.segments.map((s) => s.distanceToPoint(point)));
+    }
+
+    distanceToPoly(poly) {
+        return Math.min(...this.points.map((p) => poly.distanceToPoint(p)));
+    }
+
     draw(ctx, { stroke = "blue", lineWidth = 2, fill = "rgba(0, 0, 255, 0.3)"} = {}) {
         ctx.beginPath();
         ctx.fillStyle = fill;
