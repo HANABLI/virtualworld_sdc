@@ -10,9 +10,13 @@
         <div id="controls">
             <button onclick="dispose()">🗑️</button>
             <button onclick="save()">💾</button>
+            &nbsp;
+            <button id="graphButton" onclick="setMode('graph')"></button>
+            <button id="stopButton" onclick="setMode('stop')"></button>
         </div>
         
         <script src="js/items/tree.js"></script>
+        <script src="js/items/building.js"></script>
         <script src="js/world.js"></script>
         <script src="js/math/graph.js"></script>
         <script src="js/math/utils.js"></script>
@@ -23,7 +27,7 @@
         <script src="js/graphEditor.js"></script>
         <script src="js/viewport.js"></script>
         <script>       
-            myCanvas.width = 800;
+            myCanvas.width = 1600;
             myCanvas.height = 800;
 
             const ctx = myCanvas.getContext("2d");
