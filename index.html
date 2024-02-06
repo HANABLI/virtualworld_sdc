@@ -10,11 +10,11 @@
         <div id="controls">
             <button onclick="dispose()">🗑️</button>
             <button onclick="save()">💾</button>
-            &nbsp;
-            <button id="graphButton" onclick="setMode('graph')"></button>
-            <button id="stopButton" onclick="setMode('stop')"></button>
+            <button id="graphBtn" onclick="setMode('graph')">🌍</button>
+            <button id="stopBtn" onclick="setMode('stop')">🛑</button>
         </div>
         
+        <script src="js/markings/stop.js"></script>
         <script src="js/items/tree.js"></script>
         <script src="js/items/building.js"></script>
         <script src="js/world.js"></script>
@@ -25,10 +25,11 @@
         <script src="js/primitives/polygon.js"></script>
         <script src="js/primitives/envelope.js"></script>
         <script src="js/graphEditor.js"></script>
+        <script src="js/stopEditor.js"></script>
         <script src="js/viewport.js"></script>
         <script>       
             myCanvas.width = 1600;
-            myCanvas.height = 800;
+            myCanvas.height = 1600;
 
             const ctx = myCanvas.getContext("2d");
             const graphString = localStorage.getItem('graph');
@@ -39,8 +40,12 @@
             
             const viewPort = new ViewPort(myCanvas);
             const graphEditor = new GraphEditor(viewPort, graph);
+            const stopEditor = new StopEditor(viewPort, world);
 
             let oldGraphHash = graph.hash();
+
+            setMode("graph");
+
             animate();
 
             function animate() {        
@@ -52,6 +57,7 @@
                 const viewPoint = scale(viewPort.getOffset(), -1)
                 world.draw(ctx, viewPoint);
                 graphEditor.display();
+                stopEditor.display();
 
                 //new Polygon(graph.points).draw(ctx);
                 //new Envelope(graph.segments[0], 200, 20).draw(ctx);
@@ -66,6 +72,30 @@
                 localStorage.setItem("graph", JSON.stringify(graph));
             }
 
+            function setMode(mode) {
+                disableEditors();
+                switch (mode) {
+                    case "graph":
+                        graphBtn.style.backroundColor = "white";
+                        graphBtn.style.filter = "";
+                        graphEditor.enable();
+                        break;
+                    case "stop":
+                        stopBtn.style.backroundColor = "white";
+                        stopBtn.style.filter = "";
+                        stopEditor.enable();
+                        break;
+                }
+            }
+
+            function disableEditors() {
+                graphBtn.style.backroundColor = "gray";
+                graphBtn.style.filter = "grayscale(100%)";
+                graphEditor.disable();
+                stopBtn.style.backroundColor = "gray";
+                stopBtn.style.filter = "grayscale(100%)";
+                stopEditor.disable();
+            }
         </script>
     </body>
 </html>

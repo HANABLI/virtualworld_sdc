@@ -11,6 +11,19 @@ function getNearestPoint(loc, points, threshold = Number.MAX_SAFE_INTEGER) {
     return nearest;
 }
 
+function getNearestSegment(loc, segments, threshold = Number.MAX_SAFE_INTEGER) {
+    let minDist = Number.MAX_SAFE_INTEGER;
+    let nearest = null
+    for (const seg of segments) {
+        const dist = seg.distanceToPoint(loc);
+        if (dist < minDist && dist < threshold) {
+            minDist = dist;
+            nearest = seg;
+        }
+    }
+    return nearest;
+}
+
 function getIntersection(A, B, C, D) {
     const tTop = (D.x - C.x) * (A.y - C.y) - (D.y - C.y) * (A.x - C.x);
     const uTop = (C.y - A.y) * (A.x - B.x) - (C.x - A.x) * (A.y - B.y);
@@ -88,5 +101,10 @@ function getRandomColor() {
     return "hsl(" + hue + ", 100%, 60%)";
 }
 
-
+function getFake3dPoint(point, viewPoint, height) {
+    const dir = normalize(substract(point, viewPoint));
+    const dist = distance(point, viewPoint);
+    const scaler = Math.atan(dist / 300) / (Math.PI / 2);
+    return add(point, scale(dir, height * scaler));
+ }
 

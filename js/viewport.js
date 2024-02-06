@@ -2,7 +2,7 @@ class ViewPort {
     constructor(canvas) {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
-        this.zoom = 1; 
+        this.zoom = 0.1; 
         this.center = new Point(canvas.width / 2, canvas.height / 2);
         this.offset = scale(this.center, -1);
         this.pan = {
@@ -52,7 +52,7 @@ class ViewPort {
         const direction = Math.sign(evt.deltaY);
         const step = 0.1
         this.zoom += direction * step;
-        this.zoom = Math.max(1, Math.min(5, this.zoom));
+        this.zoom = Math.max(0.1, Math.min(10, this.zoom));
     }
 
     getMouse(evt, substractPanOffset = false) {

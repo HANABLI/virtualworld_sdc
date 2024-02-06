@@ -18,7 +18,8 @@ class World {
         this.buildings = [];
         this.roadBorders = [];
         this.envelopes = [];
-
+        this.lineGuides = [];
+        this.markings = [];
 
         this.generate();
     }
@@ -31,6 +32,8 @@ class World {
         this.roadBorders = Polygon.union(this.envelopes.map((env) => env.polygone));
         this.buildings = this.#generateBuildings();
         this.trees = this.#generateTrees();
+        this.lineGuides.length = 0;
+        this.lineGuides.push(...this.#generateLineGuides());
     }
 
 
@@ -161,6 +164,22 @@ class World {
         return bases.map((b) => new Building(b));
     }
 
+    #generateLineGuides() {
+        const tmpEnvelopes = [];
+        for (const seg of this.graph.segments) {
+            tmpEnvelopes.push(
+                new Envelope(
+                    seg, 
+                    this.roadWidth / 2,
+                    this.roadRoundness
+                )
+            );
+        }
+        const segments = Polygon.union(tmpEnvelopes.map((e) => e.polygone));
+        return segments;
+    }
+
+
     draw(ctx, viewPoint) {
         for (const envelope of this.envelopes) {
             envelope.draw(ctx, { fill: "#BBB", stroke: "#BBB", lineWidth: 15});
@@ -171,7 +190,9 @@ class World {
         for (const seg of this.graph.segments) {
             seg.draw(ctx, { color: "white", width: 4, dash: [10, 10] });
         }
-
+        for (const marking of this.markings) {
+            marking.draw(ctx);
+        }
         const items = [...this.buildings, ...this.trees];
         items.sort(
             (a, b) =>
@@ -181,6 +202,9 @@ class World {
         for (const item of items) {
             item.draw(ctx, viewPoint);
         }
+        // for (const seg of this.lineGuides) {
+        //     seg.draw(ctx, {color : "red"});
+        // }
         // for (const bld of this.buildings) {
         //     bld.draw(ctx, viewPoint);
         // }
