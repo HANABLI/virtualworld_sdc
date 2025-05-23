@@ -1,5 +1,5 @@
 class World {
-    constructor(graph, 
+    constructor(graph, viewport,
         roadWidh = 100, 
         roadRoundness = 10, 
         buildingWidth = 150, 
@@ -13,17 +13,47 @@ class World {
         this.buildingMinLength = buildingMinLength;
         this.spacing = spacing;
         this.treeSize = treeSize;
-
-        
+        this.viewport = viewport;
+        this.zoom = 1;
+        this.offset = { x: 0, y: 0 };
+        this.infoPanelWidth = 200;
+        this.infoPanelHeight = 150;
+        this.infoPanelX = 10;
+        this.infoPanelY = 10;
         this.buildings = [];
         this.roadBorders = [];
         this.envelopes = [];
         this.lineGuides = [];
         this.markings = [];
+        this.sensors = [];
+        // In your World class:
+        this.videoElements = {}; // Store video elements
+        this.videos = {
+            "Camera.png": "camera", // Changed to "camera"
+            "Wall.png": "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8"
+        }
 
         this.generate();
+        this.initCameraStream(); // Initialize camera stream
     }
-    
+
+    async initCameraStream() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            const video = document.createElement('video');
+            video.srcObject = stream;
+            video.muted = true;
+            video.loop = true;
+            video.style.display = 'none';
+            document.body.appendChild(video);
+            this.videoElements["camera"] = video; // Store as "camera"
+            video.play();
+            console.log("Camera stream initialized successfully.");
+        } catch (err) {
+            console.error("Error accessing camera:", err);
+        }
+    }
+
     generate() {
         this.envelopes.length = 0;
         for (const seg of this.graph.segments) {
@@ -36,6 +66,28 @@ class World {
         this.lineGuides.push(...this.#generateLineGuides());
     }
 
+
+    getNearestSensor(loc) {
+        let minDist = Number.MAX_SAFE_INTEGER;
+        let nearest = null;
+
+        for (const sensor of this.sensors) {
+            const dist = distance(sensor.position, loc);
+            if (dist < minDist) {
+                minDist = dist;
+                nearest = sensor;
+            }
+        }
+        return nearest;
+    }
+
+    addSensor(sensor) {
+        this.sensors.push(sensor);
+    }
+
+    removeSensor(sensor) {
+        this.sensors.splice(this.sensors.indexOf(sensor), 1);
+    }
 
     #generateTrees() {
         const points = [
@@ -71,7 +123,7 @@ class World {
             }
 
             // check if trees intersects each others
-            if(keep) {
+            if (keep) {
                 for (const tree of trees) {
                     if (distance(tree.center, p) < this.treeSize) {
                         keep = false;
@@ -180,7 +232,16 @@ class World {
     }
 
 
+
     draw(ctx, viewPoint) {
+
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+        // Sauvegarder l'état initial du canvas
+        ctx.save();
+
+
+        let selectedSensor = null
         for (const envelope of this.envelopes) {
             envelope.draw(ctx, { fill: "#BBB", stroke: "#BBB", lineWidth: 15});
         }
@@ -193,6 +254,7 @@ class World {
         for (const marking of this.markings) {
             marking.draw(ctx);
         }
+
         const items = [...this.buildings, ...this.trees];
         items.sort(
             (a, b) =>
@@ -202,15 +264,115 @@ class World {
         for (const item of items) {
             item.draw(ctx, viewPoint);
         }
-        // for (const seg of this.lineGuides) {
-        //     seg.draw(ctx, {color : "red"});
-        // }
-        // for (const bld of this.buildings) {
-        //     bld.draw(ctx, viewPoint);
-        // }
-        // for (const tree of this.trees) {
-        //     tree.draw(ctx, viewPoint);
-        // }
+        for (const sensor of this.sensors) {
+            sensor.draw(ctx);
+            if (sensor.selected) {
+                selectedSensor = sensor;
+            }
+        }
+        // Restaurer l'état du canvas pour annuler les transformations du viewport
+        ctx.restore();
+
+        // Sauvegarder l'état actuel du canvas avant de dessiner l'infoPanel
+        ctx.save();
+
+        // Dessiner l'infoPanel
+        this.#drawInfoPanel(ctx, selectedSensor);
+
+        // Dessiner le videoPanel
+        this.#drawVideoPanel(ctx, selectedSensor);
+
+        // Restaurer l'état du canvas pour annuler les transformations de l'infoPanel
+        ctx.restore();
+    }
+
+    async #drawInfoPanel(ctx, sensor) {
+
+        // Restaurer les transformations du viewport pour dessiner le panneau d'informations dans le coin supérieur gauche
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(this.infoPanelX, this.infoPanelY, this.infoPanelWidth, this.infoPanelHeight);
+
+        ctx.fillStyle = 'white';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'left';
+
+        if (sensor && sensor.selected) {
+            ctx.fillText(`Icon: ${sensor.iconName}`, this.infoPanelX + 10, this.infoPanelY + 20);
+            ctx.fillText(`X: ${sensor.position.x.toFixed(2)}`, this.infoPanelX + 10, this.infoPanelY + 40);
+            ctx.fillText(`Y: ${sensor.position.y.toFixed(2)}`, this.infoPanelX + 10, this.infoPanelY + 60);  
+
+        } else {
+            ctx.fillText('No sensor selected', this.infoPanelX + 10, this.infoPanelY + 20);
+        }
+    }
+
+    async #drawVideoPanel(ctx, sensor) {
+        // Restaurer les transformations du viewport
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+        // Définir la position et la taille du panneau vidéo
+        const videoPanelX = this.infoPanelX;
+        const videoPanelY = this.infoPanelY + this.infoPanelHeight + 10; // Positionné sous le panneau d'informations
+        const videoPanelWidth = this.infoPanelWidth;
+        const videoPanelHeight = 150; // Hauteur du panneau vidéo
+
+        // Dessiner le fond du panneau vidéo
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(videoPanelX, videoPanelY, videoPanelWidth, videoPanelHeight);
+
+        // Si un capteur est sélectionné, afficher la vidéo (simulée ici avec un texte)
+        ctx.fillStyle = 'white';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+
+        if (sensor && sensor.selected) {
+            // Check if the sensor is a video sensor
+            if (sensor.iconName === "Camera.png") { // Check for "Camera.png"
+                const video = this.videoElements["camera"]; // Access camera stream
+                if (video) {
+                    try {
+                        ctx.drawImage(video, videoPanelX, videoPanelY, videoPanelWidth, videoPanelHeight);
+                    } catch (e) {
+                        console.error("Error drawing camera stream:", e);
+                        ctx.fillText("Error: Camera stream failed.", videoPanelX + videoPanelWidth / 2, videoPanelY + videoPanelHeight / 2);
+                    }
+                } else {
+                    ctx.fillText("Camera stream not initialized.", videoPanelX + videoPanelWidth / 2, videoPanelY + videoPanelHeight / 2);
+                }
+            }
+            else if (this.videos[sensor.iconName]) {
+                const videoUrl = this.videos[sensor.iconName];
+                // Create a video element
+                let video = this.videoElements[videoUrl];
+                if (!video) {
+                    video = document.createElement('video');
+                    video.src = videoUrl;
+                    video.muted = true;
+                    video.loop = true;
+                    video.style.display = 'none';
+                    document.body.appendChild(video);
+                    this.videoElements[videoUrl] = video;
+                    video.load();
+                }
+                if (video) {
+                    try {
+                        ctx.drawImage(video, videoPanelX, videoPanelY, videoPanelWidth, videoPanelHeight);
+                    } catch (e) {
+                        console.error("Error drawing video:", e);
+                        ctx.fillText("Error: Video failed.", videoPanelX + videoPanelWidth / 2, videoPanelY + videoPanelHeight / 2);
+                    }
+                } else {
+                    ctx.fillText("Video Element Not Found", videoPanelX + videoPanelWidth / 2, videoPanelY + videoPanelHeight / 2);
+                }
+            }
+            else {
+                ctx.fillText('Video Stream Here', videoPanelX + videoPanelWidth / 2, videoPanelY + videoPanelHeight / 2);
+            }
+        } else {
+            ctx.fillText('No Video', videoPanelX + videoPanelWidth / 2, videoPanelY + videoPanelHeight / 2);
+        }
     }
 
 }
