@@ -2,7 +2,7 @@ class ViewPort {
     constructor(canvas) {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
-        this.zoom = 0.1; 
+        this.zoom = 1;
         this.center = new Point(canvas.width / 2, canvas.height / 2);
         this.offset = scale(this.center, -1);
         this.pan = {
@@ -10,10 +10,9 @@ class ViewPort {
             end: new Point(0, 0),
             offset: new Point(0, 0),
             active: false
-        };       
+        };
         this.#addEventListeners();
     }
-
 
     #addEventListeners() {
         this.canvas.addEventListener("mousewheel", this.#handleMouseWheel.bind(this));
@@ -23,7 +22,7 @@ class ViewPort {
     }
 
     #handleMouseDown(evt) {
-        if (evt.button == 1) {
+        if (evt.button == 0) { // left click
             this.pan.start = this.getMouse(evt);
             this.pan.active = true;
         }
@@ -56,7 +55,7 @@ class ViewPort {
     }
 
     getMouse(evt, substractPanOffset = false) {
-        const p =  new Point(
+        const p = new Point(
             (evt.offsetX - this.center.x) * this.zoom - this.offset.x,
             (evt.offsetY - this.center.y) * this.zoom - this.offset.y
         );
@@ -65,6 +64,19 @@ class ViewPort {
 
     getOffset() {
         return add(this.offset, this.pan.offset);
+    }
+
+    // getWorldPoint(evt) {
+    //     return new Point(
+    //         (evt.x + this.offset.x) / this.zoom + this.center.x,
+    //         (evt.y + this.offset.y) / this.zoom + this.center.y
+    //     );
+    // }
+
+    getWorldPoint(point) {
+        const worldX = (point.x - this.center.x) / this.zoom + this.offset.x;
+        const worldY = (point.y - this.center.y) / this.zoom + this.offset.y;
+        return { x: worldX, y: worldY };
     }
 
     reset() {
