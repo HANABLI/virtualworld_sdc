@@ -23,3 +23,14 @@ button {
     height: 150;
     width: 300;
 }
+
+#sensors ul li img {
+    width: 150px;
+    height: 150px;
+    transition: transform 0.2s ease-in-out; /* Ajoute une transition pour un effet plus doux */
+}
+
+#sensors ul li img:hover {
+    transform: scale(1.1); /* Agrandit l'icône au survol */
+    opacity: 0.7; /* Diminue l'opacité au survol */
+}

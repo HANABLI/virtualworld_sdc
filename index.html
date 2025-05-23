@@ -1,9 +1,63 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>World Editor</title>
-        <link rel="stylesheet" href="styles.css"/>
-    </head>
+    <title>World Editor</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        /* Style the sensor navigation bar */
+        #sensorNav {
+            position: fixed;
+            top: 80px;
+            right: 0; /* Changed from left: 0 to right: 0 */
+            width: auto; /* Changed from width: 100% to width: auto */
+            height: calc(100vh - 80px); /* Take up the remaining vertical space */
+            background-color: #333;
+            padding: 10px;
+            overflow-y: auto; /* Enable vertical scrolling */
+            white-space: normal; /* Allow items to wrap to the next line */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex; /* Use flexbox for layout */
+            flex-direction: column; /* Stack items vertically */
+            align-items: center; /* Center items horizontally */
+        }
+
+        /* Style the sensor icons */
+        #sensorNav img {
+            width: 60px;
+            /* Larger icons */
+            height: 60px;
+            /* Larger icons */
+            margin: 0 15px;
+            /* Increased spacing */
+            cursor: pointer;
+            /* Hand cursor */
+            border: 2px solid transparent;
+            border-radius: 8px;
+            /* More rounded corners */
+            transition: all 0.3s ease;
+            /* Smooth transition for all properties */
+            opacity: 0.7;
+            /* Slightly transparent */
+        }
+
+       /* Highlight the sensor icon on hover and when selected */
+        #sensorNav img:hover,
+        #sensorNav img.selected {
+            /* Highlight color */
+            opacity: 1;
+            /* Fully opaque */
+            transform: scale(1.1);
+            /* Slight scale up */
+        }
+
+        /* Ensure canvas and controls are below the nav */
+        canvas,
+        /* #controls {
+            margin-top: 100px;
+            /* Adjust based on nav height */
+        } */
+    </style>
+</head>
     <body>
         <h1>World Editor</h1>
         <canvas id="myCanvas"></canvas>
@@ -12,11 +66,64 @@
             <button onclick="save()">💾</button>
             <button id="graphBtn" onclick="setMode('graph')">🌍</button>
             <button id="stopBtn" onclick="setMode('stop')">🛑</button>
+            <button id="sensorBtn" onclick="setMode('sensor')">📡</button>
         </div>
         
+<!-- Sensor Navigation Bar -->
+    <div id="sensorNav">
+        <img src="resources/Barriere.png" alt="Barriere" draggable="true"
+            ondragstart="sensorEditor.selectIcon('Barriere.png')" />
+        <img src="resources/Bike.png" alt="Bike" draggable="true"
+            ondragstart="sensorEditor.selectIcon('Bike.png')" />
+        <img src="resources/Borne.png" alt="Borne" draggable="true"
+            ondragstart="sensorEditor.selectIcon('Borne.png')" />
+        <img src="resources/Car.png" alt="Car" draggable="true"
+            ondragstart="sensorEditor.selectIcon('Car.png')" />
+        <img src="resources/Drone.png" alt="Drone" draggable="true"
+            ondragstart="sensorEditor.selectIcon('Drone.png')" />
+        <img src="resources/Locker.png" alt="Locker" draggable="true"
+            ondragstart="sensorEditor.selectIcon('Locker.png')" />
+        <img src="resources/Temp.png" alt="Temp" draggable="true"
+            ondragstart="sensorEditor.selectIcon('Temp.png')" />
+        <img src="resources/Wall.png" alt="Wall" draggable="true"
+            ondragstart="sensorEditor.selectIcon('Wall.png')" />
+        <img src="resources/Water.png" alt="Water" draggable="true"
+            ondragstart="sensorEditor.selectIcon('Water.png')" />
+        <img src="resources/Barometre.png" alt="Barometre" draggable="true"
+            ondragstart="sensorEditor.selectIcon('Barometre.png')" />
+        <img src="resources/Camera.png" alt="Camera" draggable="true"
+            ondragstart="sensorEditor.selectIcon('Camera.png')" />
+         <!-- <img src="resources/Light.png" alt="Light" draggable="true"
+            ondragstart="sensorEditor.selectIcon('Light.png')" />
+        <img src="resources/Noise.png" alt="Noise" draggable="true"
+            ondragstart="sensorEditor.selectIcon('Noise.png')" />
+        <img src="resources/Pressure.png" alt="Pressure" draggable="true"
+            ondragstart="sensorEditor.selectIcon('Pressure.png')" />
+        <img src="resources/Smoke.png" alt="Smoke" draggable="true"
+            ondragstart="sensorEditor.selectIcon('Smoke.png')" />
+        <img src="resources/Soil.png" alt="Soil" draggable="true"
+            ondragstart="sensorEditor.selectIcon('Soil.png')" />
+        <img src="resources/Speed.png" alt="Speed" draggable="true" 
+            ondragstart="sensorEditor.selectIcon('Speed.png')" /> -->
+        <img src="resources/PH.png" alt="PH" draggable="true"
+            ondragstart="sensorEditor.selectIcon('PH.png')" />
+        <img src="resources/CO2.png" alt="CO2" draggable="true"
+            ondragstart="sensorEditor.selectIcon('CO2.png')" />
+        <img src="resources/UV.png" alt="UV" draggable="true"
+            ondragstart="sensorEditor.selectIcon('UV.png')" />
+        <img src="resources/Silo.png" alt="Silo" draggable="true"
+            ondragstart="sensorEditor.selectIcon('Silo.png')" />
+        <img src="resources/WaterLevel.png" alt="WaterLevel" draggable="true"
+            ondragstart="sensorEditor.selectIcon('WaterLevel.png')" />
+        <img src="resources/Electrovanne.png" alt="WaterQuality" draggable="true"
+            ondragstart="sensorEditor.selectIcon('Electrovanne.png')" />
+        <!-- Add more sensor icons here -->
+    </div>
+
         <script src="js/markings/stop.js"></script>
         <script src="js/items/tree.js"></script>
         <script src="js/items/building.js"></script>
+        <script src="js/items/sensor.js"></script>
         <script src="js/world.js"></script>
         <script src="js/math/graph.js"></script>
         <script src="js/math/utils.js"></script>
@@ -26,21 +133,26 @@
         <script src="js/primitives/envelope.js"></script>
         <script src="js/graphEditor.js"></script>
         <script src="js/stopEditor.js"></script>
+        <script src="js/sensorEditor.js"></script>
         <script src="js/viewport.js"></script>
+
         <script>       
             myCanvas.width = 1600;
-            myCanvas.height = 1600;
+            myCanvas.height = 600;
 
             const ctx = myCanvas.getContext("2d");
             const graphString = localStorage.getItem('graph');
             const graphInfo = graphString ? JSON.parse(graphString) : null;
             const graph = graphInfo ?  Graph.load(graphInfo) : new Graph() ; // we load graph from localStorage if existed, if nothing to get from localStorage we create an empti graph
             
-            const world = new World(graph); // the wold will be based on the graph
+           
             
             const viewPort = new ViewPort(myCanvas);
+             const world = new World(graph, viewPort); // the wold will be based on the graph
             const graphEditor = new GraphEditor(viewPort, graph);
             const stopEditor = new StopEditor(viewPort, world);
+            const sensorEditor = new SensorEditor(viewPort, world);
+            
 
             let oldGraphHash = graph.hash();
 
@@ -58,6 +170,7 @@
                 world.draw(ctx, viewPoint);
                 graphEditor.display();
                 stopEditor.display();
+                sensorEditor.display();
 
                 //new Polygon(graph.points).draw(ctx);
                 //new Envelope(graph.segments[0], 200, 20).draw(ctx);
@@ -85,6 +198,11 @@
                         stopBtn.style.filter = "";
                         stopEditor.enable();
                         break;
+                    case "sensor":
+                        sensorBtn.style.backgroundColor = "white";
+                        sensorBtn.style.filter = "";
+                        sensorEditor.enable();
+                        break;
                 }
             }
 
@@ -95,6 +213,9 @@
                 stopBtn.style.backroundColor = "gray";
                 stopBtn.style.filter = "grayscale(100%)";
                 stopEditor.disable();
+                sensorBtn.style.backroundColor = "gray";
+                sensorBtn.style.filter = "grayscale(100%)";
+                sensorEditor.disable();
             }
         </script>
     </body>
